@@ -1,0 +1,7 @@
+server() {
+  elm-live src/Main.elm -p 31313 -s elm-live.html -- --output=build/main.js
+}
+
+fmt() {
+  elm-format --yes src
+}
