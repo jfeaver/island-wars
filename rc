@@ -1,5 +1,5 @@
 server() {
-  elm-live src/Main.elm -p 31313 -s elm-live.html -- --output=build/main.js
+  elm-go src/Main.elm -p 31313 --dir=./www --hot -- --output=www/main.js
 }
 
 fmt() {

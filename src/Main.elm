@@ -1,7 +1,10 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (button, div, text)
+import Canvas exposing (rect, shapes)
+import Canvas.Settings exposing (fill)
+import Color
+import Html exposing (Html, button, canvas, div, text)
 import Html.Events exposing (onClick)
 
 
@@ -57,13 +60,27 @@ update msg model =
 
 view : Model -> Browser.Document Msg
 view model =
-    case model of
-        MainMenu ->
-            { title = "Canvas Test"
-            , body =
-                [ div [] [ button [ onClick StartGame ] [ text "Hello Menu" ] ]
-                ]
-            }
+    let
+        body =
+            case model of
+                MainMenu ->
+                    [ div [] [ button [ onClick StartGame ] [ text "New Game" ] ]
+                    ]
 
-        InGame ->
-            Debug.todo "branch 'InGame' not implemented"
+                InGame ->
+                    [ div [] [ text "Hello Game" ]
+                    , canvas model
+                    ]
+    in
+    { title = "Island Wars"
+    , body = body
+    }
+
+
+canvas : Model -> Html Msg
+canvas model =
+    let
+        renderables =
+            [ shapes [ fill Color.green ] [ rect ( 100, 100 ) 50 100 ] ]
+    in
+    Canvas.toHtml ( 500, 500 ) [] renderables
