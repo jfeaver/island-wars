@@ -58,7 +58,7 @@ elevationFromNoise size permutationTable =
                     { steps = 3
                     , stepSize = 2.0
                     , persistence = 2.0
-                    , scale = 2.5
+                    , scale = 3.0
                     }
 
                 -- number between 0 and 2 scaled down further away from the center
@@ -72,7 +72,7 @@ elevationFromNoise size permutationTable =
 
                 -- How many possible elevation values are there?
                 maxElevation =
-                    17
+                    22
             in
             if distance > maxRadiusF || islandNoise < noiseThreshold then
                 0
@@ -125,7 +125,6 @@ renderable hexSize island =
                 offset =
                     island.size // 10
             in
-            -- TODO: Offset by max radius (or max radius minus one) to center the island
             ( xi + i - offset, yi + j - offset )
 
         columnFolder : Int -> Int -> Elevation -> List Canvas.Renderable -> List Canvas.Renderable
@@ -143,19 +142,6 @@ renderable hexSize island =
     in
     List.Extra.indexedFoldl mapFolder [] island.elevationMap
         |> Canvas.group []
-
-
-
--- renderableHex : Int -> Island -> Canvas.Renderable
--- renderableHex hexSize island =
---     let
---         hex =
---             hexagon hexSize island.center
---         hexPath =
---             Tuple.second hex.corners |> List.map lineTo
---         -- landHexes = island.elevationMap
---     in
---     shapes [ stroke Color.white, fill Color.green ] [ path (Tuple.first hex.corners) hexPath ]
 
 
 randomSizeGenerator : Random.Generator Int
@@ -176,5 +162,4 @@ randomSizeGenerator =
 
 randomTypeGenerator : Random.Generator IslandType
 randomTypeGenerator =
-    -- Random.uniform Vanilla [ Cliffs, Mountains, Woods ]
     Random.weighted ( 6, Vanilla ) [ ( 2, Cliffs ), ( 2, Mountains ), ( 2, Woods ) ]

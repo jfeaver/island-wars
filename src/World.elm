@@ -14,7 +14,7 @@ import Simplex
 
 
 oceanColor =
-    Color.rgb 0 0.2 0.4
+    Color.rgb255 0 64 128
 
 
 height =

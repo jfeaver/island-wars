@@ -1,8 +1,8 @@
 module Island.Elevation exposing (..)
 
 import Color
-import Dict
-import Island.IslandType as IslandType exposing (IslandType(..))
+import Island.IslandType exposing (IslandType(..))
+import Island.LandType as LandType exposing (LandType(..))
 
 
 type alias Elevation =
@@ -13,36 +13,107 @@ type alias Elevation2D =
     List (List Elevation)
 
 
+landType : IslandType -> Elevation -> LandType
+landType iType elevation =
+    let
+        vanillaLands =
+            if elevation < 2 then
+                Beach1
+
+            else if elevation < 4 then
+                Beach2
+
+            else if elevation < 8 then
+                Grass1
+
+            else if elevation < 10 then
+                Grass2
+
+            else if elevation < 14 then
+                Trees1
+
+            else if elevation < 17 then
+                Mountain1
+
+            else
+                Mountain2
+
+        mountainsLands =
+            if elevation < 3 then
+                Beach1
+
+            else if elevation < 5 then
+                Beach2
+
+            else if elevation < 8 then
+                Stones1
+
+            else if elevation < 11 then
+                Stones2
+
+            else if elevation < 13 then
+                Stones3
+
+            else if elevation < 16 then
+                Mountain1
+
+            else
+                Mountain2
+
+        woodsLands =
+            if elevation < 3 then
+                Beach1
+
+            else if elevation < 8 then
+                Trees1
+
+            else if elevation < 9 then
+                Trees2
+
+            else if elevation < 17 then
+                Trees3
+
+            else
+                Mountain1
+
+        cliffsLands =
+            if elevation < 3 then
+                Cliffs1
+
+            else if elevation < 4 then
+                Cliffs2
+
+            else if elevation < 11 then
+                Grass1
+
+            else if elevation < 16 then
+                Trees1
+
+            else if elevation < 17 then
+                Mountain1
+
+            else
+                Mountain2
+    in
+    if elevation == 0 then
+        Ocean
+
+    else
+        case iType of
+            Vanilla ->
+                vanillaLands
+
+            Mountains ->
+                mountainsLands
+
+            Woods ->
+                woodsLands
+
+            Cliffs ->
+                cliffsLands
+
+
 color : IslandType -> Elevation -> Color.Color
 color iType elevation =
-    let
-        vanillaDict : Dict.Dict Elevation Color.Color
-        vanillaDict =
-            Dict.fromList
-                [ ( 1, Color.hsl (50 / 360) (90 / 100) (60 / 100) )
-                , ( 2, Color.hsl (65 / 360) (80 / 100) (60 / 100) )
-                , ( 3, Color.hsl (80 / 360) (55 / 100) (60 / 100) )
-                , ( 4, Color.hsl (87 / 360) (50 / 100) (60 / 100) )
-                , ( 5, Color.hsl (92 / 360) (62 / 100) (60 / 100) )
-                , ( 6, Color.hsl (95 / 360) (75 / 100) (60 / 100) )
-                , ( 7, Color.hsl (98 / 360) (90 / 100) (60 / 100) )
-                , ( 8, Color.hsl (99 / 360) (90 / 100) (60 / 100) )
-                , ( 9, Color.hsl (100 / 360) (90 / 100) (60 / 100) )
-                , ( 10, Color.hsl (100 / 360) (90 / 100) (60 / 100) )
-                , ( 11, Color.hsl (100 / 360) (90 / 100) (60 / 100) )
-                , ( 12, Color.hsl (220 / 360) (10 / 100) (90 / 100) )
-                , ( 13, Color.hsl (220 / 360) (10 / 100) (90 / 100) )
-                , ( 14, Color.hsl (220 / 360) (10 / 100) (90 / 100) )
-                , ( 15, Color.hsl (220 / 360) (10 / 100) (97 / 100) )
-                , ( 16, Color.hsl (220 / 360) (10 / 100) (97 / 100) )
-                , ( 17, Color.hsl (220 / 360) (10 / 100) (97 / 100) )
-                ]
-
-        colorDict =
-            Dict.fromList
-                [ ( IslandType.toString Vanilla, vanillaDict )
-                ]
-    in
-    Dict.get (IslandType.toString iType) colorDict
-        |> Maybe.andThen (Dict.get elevation)
-        |> Maybe.withDefault Color.purple
+    landType iType elevation
+        |> LandType.toColor
