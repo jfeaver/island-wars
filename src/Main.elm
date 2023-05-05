@@ -1,11 +1,11 @@
 module Main exposing (..)
 
 import Browser
-import Canvas exposing (rect, shapes)
-import Canvas.Settings exposing (fill)
-import Color
-import Html exposing (Html, button, canvas, div, text)
+import Canvas.Settings.Text exposing (TextAlign(..))
+import Html exposing (button, div, text)
 import Html.Events exposing (onClick)
+import Random
+import World exposing (World)
 
 
 main : Program () Model Msg
@@ -24,15 +24,12 @@ main =
 
 type Model
     = MainMenu
-    | InGame
+    | InGame World
 
 
 init : () -> ( Model, Cmd Msg )
 init =
-    always
-        ( MainMenu
-        , Cmd.none
-        )
+    always <| update StartGame MainMenu
 
 
 
@@ -40,18 +37,18 @@ init =
 
 
 type Msg
-    = NoOp
-    | StartGame
+    = StartGame
+    | SeedWorld World.Seed
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
-
         StartGame ->
-            ( InGame, Cmd.none )
+            ( model, Random.generate SeedWorld World.seed )
+
+        SeedWorld worldSeed ->
+            ( InGame (World.init worldSeed), Cmd.none )
 
 
 
@@ -67,20 +64,10 @@ view model =
                     [ div [] [ button [ onClick StartGame ] [ text "New Game" ] ]
                     ]
 
-                InGame ->
-                    [ div [] [ text "Hello Game" ]
-                    , canvas model
+                InGame world ->
+                    [ World.view world
                     ]
     in
     { title = "Island Wars"
     , body = body
     }
-
-
-canvas : Model -> Html Msg
-canvas model =
-    let
-        renderables =
-            [ shapes [ fill Color.green ] [ rect ( 100, 100 ) 50 100 ] ]
-    in
-    Canvas.toHtml ( 500, 500 ) [] renderables
