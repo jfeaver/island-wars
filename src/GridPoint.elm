@@ -1,4 +1,4 @@
-module Hexagon exposing (..)
+module GridPoint exposing (..)
 
 import Canvas
 
@@ -33,25 +33,33 @@ hexVertSpacing hexSize =
     sqrt 3 * toFloat hexSize
 
 
-hexagon : Int -> GridPoint -> Hexagon
-hexagon hexSize gridPoint =
+canvasDistance : Int -> Float -> Float
+canvasDistance hexSize gridDistance =
+    gridDistance * hexVertSpacing hexSize
+
+
+toCanvas : Int -> GridPoint -> Canvas.Point
+toCanvas hexSize ( gx, gy ) =
     let
-        ( gx, gy ) =
-            gridPoint |> Tuple.mapBoth toFloat toFloat
-
-        hexSizeF =
-            toFloat hexSize
-
         {- If the row (x value of grid point) is odd then push down the center by half a vertical spacing -}
         verticalShove =
-            if modBy 2 (Tuple.first gridPoint) == 1 then
+            if modBy 2 gx == 1 then
                 hexVertSpacing hexSize / 2
 
             else
                 0
+    in
+    ( toFloat hexSize + toFloat gx * hexHorizSpacing hexSize, canvasDistance hexSize (1 / 2 + toFloat gy) + verticalShove )
+
+
+hexagon : Int -> GridPoint -> Hexagon
+hexagon hexSize gridPoint =
+    let
+        hexSizeF =
+            toFloat hexSize
 
         center =
-            ( hexSizeF + gx * hexHorizSpacing hexSize, (1 / 2 + gy) * hexVertSpacing hexSize + verticalShove )
+            toCanvas hexSize gridPoint
 
         ( x, y ) =
             center

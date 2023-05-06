@@ -39,6 +39,7 @@ init =
 type Msg
     = StartGame
     | SeedWorld World.Seed
+    | WorldMsg World.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -49,6 +50,21 @@ update msg model =
 
         SeedWorld worldSeed ->
             ( InGame (World.init worldSeed), Cmd.none )
+
+        WorldMsg worldMsg ->
+            case model of
+                InGame world ->
+                    let
+                        ( updatedWorld, cmd ) =
+                            World.update worldMsg world
+
+                        mainCmd =
+                            Cmd.map WorldMsg cmd
+                    in
+                    ( InGame updatedWorld, mainCmd )
+
+                MainMenu ->
+                    ( model, Cmd.none )
 
 
 
@@ -65,7 +81,7 @@ view model =
                     ]
 
                 InGame world ->
-                    [ World.view world
+                    [ World.view world |> Html.map WorldMsg
                     ]
     in
     { title = "Island Wars"

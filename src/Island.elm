@@ -2,7 +2,7 @@ module Island exposing (..)
 
 import Canvas exposing (lineTo, path, shapes)
 import Canvas.Settings exposing (fill, stroke)
-import Hexagon exposing (GridPoint)
+import GridPoint exposing (GridPoint)
 import Island.Elevation exposing (Elevation, Elevation2D)
 import Island.IslandType exposing (IslandType(..))
 import List.Extra
@@ -28,19 +28,23 @@ type alias IslandOptions =
 
 init : IslandOptions -> Island
 init { center, size, iType, permutationTable } =
-    Debug.log "Island" <|
-        { center = center
-        , size = size
-        , elevationMap = elevationFromNoise size permutationTable
-        , iType = iType
-        }
+    { center = center
+    , size = size
+    , elevationMap = elevationFromNoise size permutationTable
+    , iType = iType
+    }
+
+
+maxRadius : Int -> Int
+maxRadius size =
+    size // 10 + 1
 
 
 elevationFromNoise : Int -> Simplex.PermutationTable -> Elevation2D
 elevationFromNoise size permutationTable =
     let
-        maxRadius =
-            size // 10 + 1
+        maxRad =
+            maxRadius size
 
         {- currently produces numbers between 1 and 17 -}
         elevationAt x y =
@@ -52,7 +56,7 @@ elevationFromNoise size permutationTable =
                     (xf ^ 2 + yf ^ 2) ^ (1 / 2)
 
                 maxRadiusF =
-                    toFloat maxRadius
+                    toFloat maxRad
 
                 noiseConfig =
                     { steps = 3
@@ -79,11 +83,10 @@ elevationFromNoise size permutationTable =
 
             else
                 (maxElevation * (islandNoise - noiseThreshold) / (2 - noiseThreshold))
-                    -- |> (*) (1 - ((distance / maxRadiusF) ^ 3))
                     |> ceiling
 
         radiusList =
-            List.range -(maxRadius - 1) (maxRadius - 1)
+            List.range -(maxRad - 1) (maxRad - 1)
     in
     radiusList
         |> List.map
@@ -102,7 +105,7 @@ renderable hexSize island =
         hexRenderable gridPoint elevation =
             let
                 hex =
-                    Hexagon.hexagon hexSize gridPoint
+                    GridPoint.hexagon hexSize gridPoint
 
                 hexPath =
                     Tuple.second hex.corners |> List.map lineTo
