@@ -72,7 +72,7 @@ elevationFromNoise size permutationTable =
 
                 -- Noise values below this won't be used (elevation will be zero)
                 noiseThreshold =
-                    0.3
+                    0.6
 
                 -- How many possible elevation values are there?
                 maxElevation =

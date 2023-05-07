@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Browser
+import Camera exposing (Camera)
 import Canvas.Settings.Text exposing (TextAlign(..))
 import Html exposing (button, div, text)
 import Html.Events exposing (onClick)
@@ -24,12 +25,25 @@ main =
 
 type Model
     = MainMenu
-    | InGame World
+    | InGame Game
+
+
+type alias Game =
+    { world : World
+    , worldCamera : Camera
+    }
 
 
 init : () -> ( Model, Cmd Msg )
 init =
     always <| update StartGame MainMenu
+
+
+gameInit : World.Seed -> Game
+gameInit worldSeed =
+    { world = World.init worldSeed
+    , worldCamera = { height = 500, width = 1000 }
+    }
 
 
 
@@ -49,19 +63,19 @@ update msg model =
             ( model, Random.generate SeedWorld World.seed )
 
         SeedWorld worldSeed ->
-            ( InGame (World.init worldSeed), Cmd.none )
+            ( InGame (gameInit worldSeed), Cmd.none )
 
         WorldMsg worldMsg ->
             case model of
-                InGame world ->
+                InGame game ->
                     let
                         ( updatedWorld, cmd ) =
-                            World.update worldMsg world
+                            World.update worldMsg game.world
 
                         mainCmd =
                             Cmd.map WorldMsg cmd
                     in
-                    ( InGame updatedWorld, mainCmd )
+                    ( InGame { game | world = updatedWorld }, mainCmd )
 
                 MainMenu ->
                     ( model, Cmd.none )
@@ -80,8 +94,8 @@ view model =
                     [ div [] [ button [ onClick StartGame ] [ text "New Game" ] ]
                     ]
 
-                InGame world ->
-                    [ World.view world |> Html.map WorldMsg
+                InGame game ->
+                    [ World.view game.world game.worldCamera |> Html.map WorldMsg
                     ]
     in
     { title = "Island Wars"
