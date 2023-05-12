@@ -1,50 +1,46 @@
 module Island exposing (..)
 
-import Canvas exposing (lineTo, path, shapes)
-import Canvas.Settings exposing (fill, stroke)
-import GridPoint exposing (GridPoint)
-import Island.Elevation exposing (Elevation, Elevation2D)
+-- import GridPoint exposing (GridPoint)
+
+import Island.Elevation exposing (Elevation2D)
 import Island.IslandType exposing (IslandType(..))
-import List.Extra
+import Point exposing (Point)
 import Random
 import Simplex
 
 
+type alias WorldPoint =
+    Point
+
+
 type alias Island =
-    { center : GridPoint
+    { center : WorldPoint
     , size : Int
-    , elevationMap : Elevation2D
     , iType : IslandType
     }
 
 
 type alias IslandOptions =
-    { center : GridPoint
+    { center : WorldPoint
     , size : Int
     , iType : IslandType
-    , permutationTable : Simplex.PermutationTable
     }
 
 
 init : IslandOptions -> Island
-init { center, size, iType, permutationTable } =
+init { center, size, iType } =
     { center = center
     , size = size
-    , elevationMap = elevationFromNoise size permutationTable
     , iType = iType
     }
 
 
-maxRadius : Int -> Int
-maxRadius size =
-    size // 10 + 1
-
-
 elevationFromNoise : Int -> Simplex.PermutationTable -> Elevation2D
-elevationFromNoise size permutationTable =
+elevationFromNoise _ permutationTable =
     let
         maxRad =
-            maxRadius size
+            -- maxRadius size
+            11
 
         {- currently produces numbers between 1 and 17 -}
         elevationAt x y =
@@ -98,53 +94,48 @@ elevationFromNoise size permutationTable =
 
 {-| Fold elevation map into a list of renderables. Use Canvas.group to combine into one renderable.
 -}
-renderable : Int -> Island -> Canvas.Renderable
-renderable hexSize island =
-    let
-        hexRenderable : GridPoint -> Elevation -> Maybe Canvas.Renderable
-        hexRenderable gridPoint elevation =
-            let
-                hex =
-                    GridPoint.hexagon hexSize gridPoint
 
-                hexPath =
-                    Tuple.second hex.corners |> List.map lineTo
 
-                color =
-                    Island.Elevation.color island.iType elevation
-            in
-            if elevation == 0 then
-                Nothing
 
-            else
-                Just <| shapes [ stroke color, fill color ] [ path (Tuple.first hex.corners) hexPath ]
-
-        gridPointFromIndices : Int -> Int -> GridPoint
-        gridPointFromIndices i j =
-            let
-                ( xi, yi ) =
-                    island.center
-
-                offset =
-                    island.size // 10
-            in
-            ( xi + i - offset, yi + j - offset )
-
-        columnFolder : Int -> Int -> Elevation -> List Canvas.Renderable -> List Canvas.Renderable
-        columnFolder i j elevation renderables =
-            case hexRenderable (gridPointFromIndices i j) elevation of
-                Just hex ->
-                    hex :: renderables
-
-                Nothing ->
-                    renderables
-
-        mapFolder : Int -> List Elevation -> List Canvas.Renderable -> List Canvas.Renderable
-        mapFolder i columnElevation renderables =
-            List.Extra.indexedFoldl (columnFolder i) renderables columnElevation
-    in
-    List.Extra.indexedFoldl mapFolder [] island.elevationMap
-        |> Canvas.group []
+-- renderable : Int -> Island -> Canvas.Renderable
+-- renderable hexSize island =
+--     let
+--         hexRenderable : GridPoint -> Elevation -> Maybe Canvas.Renderable
+--         hexRenderable gridPoint elevation =
+--             let
+--                 hex =
+--                     GridPoint.hexagon hexSize gridPoint
+--                 hexPath =
+--                     Tuple.second hex.corners |> List.map lineTo
+--                 color =
+--                     Island.Elevation.color island.iType elevation
+--             in
+--             if elevation == 0 then
+--                 Nothing
+--             else
+--                 Just <| shapes [ stroke color, fill color ] [ path (Tuple.first hex.corners) hexPath ]
+--         gridPointFromIndices : Int -> Int -> GridPoint
+--         gridPointFromIndices i j =
+--             let
+--                 ( xi, yi ) =
+--                     island.center
+--                 offset =
+--                     island.size // 10
+--             in
+--             ( xi + i - offset, yi + j - offset )
+--         columnFolder : Int -> Int -> Elevation -> List Canvas.Renderable -> List Canvas.Renderable
+--         columnFolder i j elevation renderables =
+--             case hexRenderable (gridPointFromIndices i j) elevation of
+--                 Just hex ->
+--                     hex :: renderables
+--                 Nothing ->
+--                     renderables
+--         mapFolder : Int -> List Elevation -> List Canvas.Renderable -> List Canvas.Renderable
+--         mapFolder i columnElevation renderables =
+--             List.Extra.indexedFoldl (columnFolder i) renderables columnElevation
+--     in
+--     List.Extra.indexedFoldl mapFolder [] island.elevationMap
+--         |> Canvas.group []
 
 
 randomSizeGenerator : Random.Generator Int
@@ -166,3 +157,8 @@ randomSizeGenerator =
 randomTypeGenerator : Random.Generator IslandType
 randomTypeGenerator =
     Random.weighted ( 6, Vanilla ) [ ( 2, Cliffs ), ( 2, Mountains ), ( 2, Woods ) ]
+
+
+maxRadius : Island -> Float
+maxRadius { size } =
+    toFloat size + 10

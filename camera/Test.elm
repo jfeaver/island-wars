@@ -1,8 +1,8 @@
 module Test exposing (..)
 
 import Browser exposing (Document)
+import Camera exposing (Camera2D)
 import Camera.Utils
-import CameraTest exposing (Camera2D)
 import Html exposing (Html)
 import Html.Attributes exposing (id, style)
 import Html.Events
@@ -24,7 +24,7 @@ type alias Model =
 
 init : () -> ( Model, Cmd Msg )
 init =
-    always ( { camera = CameraTest.init ( 200, 200 ) }, Cmd.none )
+    always ( { camera = Camera.init ( 200, 200 ) }, Cmd.none )
 
 
 type Msg
@@ -41,7 +41,7 @@ update msg model =
             in
             case mZoom of
                 Just zoom ->
-                    ( { model | camera = CameraTest.setZoom model.camera zoom }, Cmd.none )
+                    ( { model | camera = Camera.setZoom model.camera zoom }, Cmd.none )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -69,10 +69,10 @@ testBox : Camera2D -> Box -> Html Msg
 testBox camera box =
     let
         pxSize =
-            CameraTest.distance camera box.size
+            Camera.distance camera box.size
 
         ( x, y ) =
-            CameraTest.locate camera box.center
+            Camera.locate camera box.center
                 |> Tuple.mapBoth (Camera.Utils.center pxSize) (Camera.Utils.center pxSize)
     in
     Html.span
@@ -91,7 +91,7 @@ view : Model -> Document Msg
 view model =
     let
         ( height, width ) =
-            CameraTest.getViewport model.camera
+            Camera.getViewport model.camera
     in
     { title = ""
     , body =
@@ -103,7 +103,7 @@ view model =
                 , Html.Attributes.min "0.1"
                 , Html.Attributes.max "3"
                 , Html.Attributes.step "0.1"
-                , Html.Attributes.value <| String.fromFloat (CameraTest.getZoom model.camera)
+                , Html.Attributes.value <| String.fromFloat (Camera.getZoom model.camera)
                 , Html.Events.onInput CameraZoom
                 ]
                 []

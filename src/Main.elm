@@ -1,10 +1,11 @@
 module Main exposing (..)
 
 import Browser
-import Camera exposing (Camera)
+import Camera exposing (Camera2D)
 import Canvas.Settings.Text exposing (TextAlign(..))
 import Html exposing (button, div, text)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (style, type_, value)
+import Html.Events exposing (onClick, onInput)
 import Random
 import World exposing (World)
 
@@ -30,7 +31,7 @@ type Model
 
 type alias Game =
     { world : World
-    , worldCamera : Camera
+    , worldCamera : Camera2D
     }
 
 
@@ -42,8 +43,17 @@ init =
 gameInit : World.Seed -> Game
 gameInit worldSeed =
     { world = World.init worldSeed
-    , worldCamera = { height = 500, width = 1000 }
+    , worldCamera = Camera.init ( 1000, 500 )
     }
+
+
+gameZoom : Game -> Float -> Game
+gameZoom game newZoom =
+    let
+        zoomedCamera =
+            Camera.setZoom game.worldCamera newZoom
+    in
+    { game | worldCamera = zoomedCamera }
 
 
 
@@ -54,6 +64,7 @@ type Msg
     = StartGame
     | SeedWorld World.Seed
     | WorldMsg World.Msg
+    | CameraZoom String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -80,6 +91,23 @@ update msg model =
                 MainMenu ->
                     ( model, Cmd.none )
 
+        CameraZoom text ->
+            case model of
+                InGame game ->
+                    let
+                        mZoom =
+                            String.toFloat text
+                    in
+                    case mZoom of
+                        Just zoom ->
+                            ( InGame <| gameZoom game zoom, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                MainMenu ->
+                    ( model, Cmd.none )
+
 
 
 --- VIEW
@@ -95,7 +123,22 @@ view model =
                     ]
 
                 InGame game ->
-                    [ World.view game.world game.worldCamera |> Html.map WorldMsg
+                    [ Html.div [ style "text-align" "center" ]
+                        [ World.view game.world game.worldCamera |> Html.map WorldMsg
+                        , Html.div []
+                            [ Html.input
+                                [ type_ "range"
+                                , Html.Attributes.min "0.1"
+                                , Html.Attributes.max "3"
+                                , Html.Attributes.step "0.1"
+                                , value <| String.fromFloat (Camera.getZoom game.worldCamera)
+                                , onInput CameraZoom
+                                ]
+                                []
+                            , Html.br [] []
+                            , Html.label [] [ Html.text "Zoom" ]
+                            ]
+                        ]
                     ]
     in
     { title = "Island Wars"
