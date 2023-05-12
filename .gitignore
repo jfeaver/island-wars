@@ -6,3 +6,4 @@
 .DS_Store
 *.pem
 /www/main.js
+/camera/www/main.js

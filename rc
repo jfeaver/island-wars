@@ -1,5 +1,9 @@
 server() {
-  elm-go src/Main.elm -p 31313 --dir=./www -- --output=www/main.js
+  elm-go src/Main.elm -p 4444 --dir=./www -- --output=www/main.js
+}
+
+test() {
+  elm-go camera/Test.elm -p 4444 --dir=./camera/www -- --output=camera/www/main.js
 }
 
 fmt() {
