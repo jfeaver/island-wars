@@ -56,4 +56,4 @@ randomTypeGenerator =
 
 maxRadius : Island -> Float
 maxRadius { size } =
-    toFloat size + 10
+    toFloat size + 500 / toFloat size

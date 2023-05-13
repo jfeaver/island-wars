@@ -39,7 +39,7 @@ init worldSeed =
         ]
     , godsHand = False
     , activeIsland = Just singleIsland
-    , focus = 3
+    , focus = 1
     }
 
 

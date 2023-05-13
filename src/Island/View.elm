@@ -118,13 +118,13 @@ renderable { camera, worldHexSize, focus, noiseConfig, permutationTable } island
                     rawNoise
                         + 1
 
-                fadedNoise =
-                    positiveNoise
-                        * (1 - (fade ^ 1.5))
-
                 -- Noise values below this won't be used (elevation will be zero)
                 noiseThreshold =
-                    0.6
+                    0.7
+
+                fadedNoise =
+                    positiveNoise
+                        * (1 - (fade ^ 1.7))
 
                 thresholdedNoise =
                     if fadedNoise < noiseThreshold then
