@@ -20,7 +20,7 @@ init worldSeed =
     let
         singleIsland =
             Island.init
-                { center = ( 0, 0 )
+                { center = ( 0, 0 ) -- FIXME: This doesn't affect where it is rendered
                 , size = 70
                 , iType = Vanilla
                 }
@@ -31,6 +31,7 @@ init worldSeed =
         ]
     , godsHand = False
     , activeIsland = Just singleIsland
+    , focus = 1
     }
 
 
@@ -39,6 +40,7 @@ type alias World =
     , islands : List Island
     , godsHand : Bool -- Is the cursor over some clickable entity?
     , activeIsland : Maybe Island
+    , focus : Float
     }
 
 
@@ -104,7 +106,7 @@ view world camera =
     let
         islands =
             world.islands
-                |> List.map (Island.View.renderable camera 1)
+                |> List.map (Island.View.renderable camera world.focus)
                 |> Canvas.group []
 
         renderables =

@@ -4,8 +4,8 @@ import Browser
 import Camera exposing (Camera2D)
 import Canvas.Settings.Text exposing (TextAlign(..))
 import Html exposing (button, div, text)
-import Html.Attributes exposing (style, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Attributes exposing (style)
+import Html.Events exposing (onClick)
 import Random
 import World exposing (World)
 
@@ -47,8 +47,12 @@ gameInit worldSeed =
     }
 
 
-gameZoom : Game -> Float -> Game
-gameZoom game newZoom =
+
+--- UPDATE
+
+
+setGameZoom : Game -> Float -> Game
+setGameZoom game newZoom =
     let
         zoomedCamera =
             Camera.setZoom game.worldCamera newZoom
@@ -56,8 +60,16 @@ gameZoom game newZoom =
     { game | worldCamera = zoomedCamera }
 
 
+setGameFocus : Game -> Float -> Game
+setGameFocus game focus =
+    let
+        world =
+            game.world
 
---- UPDATE
+        focusedWorld =
+            { world | focus = focus }
+    in
+    { game | world = focusedWorld }
 
 
 type Msg
@@ -65,6 +77,7 @@ type Msg
     | SeedWorld World.Seed
     | WorldMsg World.Msg
     | CameraZoom String
+    | WorldFocus String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -100,12 +113,29 @@ update msg model =
                     in
                     case mZoom of
                         Just zoom ->
-                            ( InGame <| gameZoom game zoom, Cmd.none )
+                            ( InGame <| setGameZoom game zoom, Cmd.none )
 
                         Nothing ->
                             ( model, Cmd.none )
 
-                MainMenu ->
+                _ ->
+                    ( model, Cmd.none )
+
+        WorldFocus text ->
+            case model of
+                InGame game ->
+                    let
+                        mFocus =
+                            String.toFloat text
+                    in
+                    case mFocus of
+                        Just focus ->
+                            ( InGame <| setGameFocus game focus, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                _ ->
                     ( model, Cmd.none )
 
 
@@ -126,17 +156,32 @@ view model =
                     [ Html.div [ style "text-align" "center" ]
                         [ World.view game.world game.worldCamera |> Html.map WorldMsg
                         , Html.div []
-                            [ Html.input
-                                [ type_ "range"
-                                , Html.Attributes.min "0.1"
-                                , Html.Attributes.max "3"
-                                , Html.Attributes.step "0.1"
-                                , value <| String.fromFloat (Camera.getZoom game.worldCamera)
-                                , onInput CameraZoom
+                            [ Html.div []
+                                [ Html.input
+                                    [ Html.Attributes.type_ "range"
+                                    , Html.Attributes.min "0.1"
+                                    , Html.Attributes.max "3"
+                                    , Html.Attributes.step "0.1"
+                                    , Html.Attributes.value <| String.fromFloat (Camera.getZoom game.worldCamera)
+                                    , Html.Events.onInput CameraZoom
+                                    ]
+                                    []
+                                , Html.br [] []
+                                , Html.label [] [ Html.text ("Zoom: " ++ String.fromFloat (Camera.getZoom game.worldCamera)) ]
                                 ]
-                                []
-                            , Html.br [] []
-                            , Html.label [] [ Html.text "Zoom" ]
+                            , Html.div []
+                                [ Html.input
+                                    [ Html.Attributes.type_ "range"
+                                    , Html.Attributes.min "0.1"
+                                    , Html.Attributes.max "3"
+                                    , Html.Attributes.step "0.1"
+                                    , Html.Attributes.value <| String.fromFloat game.world.focus
+                                    , Html.Events.onInput WorldFocus
+                                    ]
+                                    []
+                                , Html.br [] []
+                                , Html.label [] [ Html.text ("Focus: " ++ String.fromFloat game.world.focus) ]
+                                ]
                             ]
                         ]
                     ]

@@ -12,7 +12,7 @@ import Point exposing (Point)
 
 renderable : Camera2D -> Float -> Island -> Canvas.Renderable
 renderable camera focus island =
-    -- FIXME: This is taking a looong time to render
+    -- FIXME: This is taking a looong time to render (esp at high zoom or high focus)
     let
         loc =
             Camera.locate camera
@@ -55,7 +55,7 @@ renderable camera focus island =
                     island.center
 
                 vert =
-                    Hexagon.verticalSpacing worldHexSize
+                    Hexagon.verticalSpacing (worldHexSize / focus)
 
                 relToWorld ( xr, yr ) =
                     let
@@ -66,7 +66,7 @@ renderable camera focus island =
                             else
                                 0
                     in
-                    ( toFloat xr * Hexagon.horizontalSpacing worldHexSize + xc
+                    ( toFloat xr * Hexagon.horizontalSpacing (worldHexSize / focus) + xc
                     , toFloat yr * vert + yc + vertShove
                     )
             in
