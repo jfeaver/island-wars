@@ -42,10 +42,30 @@ init =
     always <| update StartGame MainMenu
 
 
+
+-- TODO:
+-- 1. Find an initial location for a settlement
+-- 2. draw the settlement
+-- 3. center/zoom the camera there
+-- 4. command the settlement to go fishing?
+
+
+cameraInit : Camera2D
+cameraInit =
+    Camera.init ( 1400, 700 )
+
+
 gameInit : World.Seed -> Game
 gameInit worldSeed =
     { world = World.init worldSeed
-    , worldCamera = Camera.init ( 1400, 700 )
+    , worldCamera = cameraInit
+    }
+
+
+staticWorld : Game
+staticWorld =
+    { world = World.static
+    , worldCamera = cameraInit
     }
 
 
@@ -118,7 +138,8 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         StartGame ->
-            ( model, Random.generate SeedWorld World.seed )
+            -- ( model, Random.generate SeedWorld World.seed )
+            ( InGame staticWorld, Cmd.none )
 
         SeedWorld worldSeed ->
             ( InGame (gameInit worldSeed), Cmd.none )

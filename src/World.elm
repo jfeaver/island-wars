@@ -22,23 +22,37 @@ hexSize =
     8
 
 
+starterIsland : Island
+starterIsland =
+    Island.init
+        { center = ( 0, 0 )
+        , size = 70
+        , iType = Vanilla
+        }
+
+
 init : Seed -> World
 init worldSeed =
-    let
-        singleIsland =
-            Island.init
-                { center = ( 0, 0 )
-                , size = 70
-                , iType = Vanilla
-                }
-    in
     { permutationTable = worldSeed.permutationTable
-    , island = singleIsland
+    , island = starterIsland
     , islands =
-        [ singleIsland
+        [ starterIsland
         ]
     , godsHand = False
-    , activeIsland = Just singleIsland
+    , activeIsland = Just starterIsland
+    , focus = 5
+    }
+
+
+static : World
+static =
+    { permutationTable = Simplex.permutationTableFromInt 36
+    , island = starterIsland
+    , islands =
+        [ starterIsland
+        ]
+    , godsHand = False
+    , activeIsland = Just starterIsland
     , focus = 5
     }
 
