@@ -17,7 +17,7 @@ type alias Camera2DR =
 init : ( Int, Int ) -> Camera2D
 init viewport =
     { viewport = viewport
-    , zoom = 3
+    , zoom = 5
     , center = ( 0, 0 )
     }
         |> Camera2D

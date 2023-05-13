@@ -27,7 +27,7 @@ init worldSeed =
     let
         singleIsland =
             Island.init
-                { center = ( 37, 13 )
+                { center = ( 0, 0 )
                 , size = 70
                 , iType = Vanilla
                 }
@@ -39,7 +39,7 @@ init worldSeed =
         ]
     , godsHand = False
     , activeIsland = Just singleIsland
-    , focus = 1
+    , focus = 5
     }
 
 

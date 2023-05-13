@@ -2,6 +2,10 @@ server() {
   elm-go src/Main.elm -p 4444 --dir=./www -- --output=www/main.js
 }
 
+editor() {
+  elm-go src/Editor.elm -p 4444 --dir=./www -- --output=www/main.js
+}
+
 fmt() {
   elm-format --yes src
 }

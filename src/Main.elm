@@ -38,13 +38,14 @@ type alias Game =
 
 init : () -> ( Model, Cmd Msg )
 init =
+    -- always <| ( MainMenu, Cmd.none )
     always <| update StartGame MainMenu
 
 
 gameInit : World.Seed -> Game
 gameInit worldSeed =
     { world = World.init worldSeed
-    , worldCamera = Camera.init ( 1000, 500 )
+    , worldCamera = Camera.init ( 1400, 700 )
     }
 
 
@@ -222,101 +223,6 @@ view model =
                 InGame game ->
                     [ Html.div [ style "text-align" "center" ]
                         [ World.view game.world game.worldCamera |> Html.map WorldMsg
-                        , Html.div []
-                            [ Html.div []
-                                [ Html.input
-                                    [ Html.Attributes.type_ "range"
-                                    , Html.Attributes.min "0.1"
-                                    , Html.Attributes.max "5"
-                                    , Html.Attributes.step "0.1"
-                                    , Html.Attributes.value <| String.fromFloat (Camera.getZoom game.worldCamera)
-                                    , Html.Events.onInput CameraZoom
-                                    ]
-                                    []
-                                , Html.br [] []
-                                , Html.label [] [ Html.text ("Zoom: " ++ String.fromFloat (Camera.getZoom game.worldCamera)) ]
-                                ]
-                            , Html.div []
-                                [ Html.input
-                                    [ Html.Attributes.type_ "range"
-                                    , Html.Attributes.min "0.1"
-                                    , Html.Attributes.max "5"
-                                    , Html.Attributes.step "0.1"
-                                    , Html.Attributes.value <| String.fromFloat game.world.focus
-                                    , Html.Events.onInput WorldFocus
-                                    ]
-                                    []
-                                , Html.br [] []
-                                , Html.label [] [ Html.text ("Focus: " ++ String.fromFloat game.world.focus) ]
-                                ]
-                            , Html.div []
-                                [ Html.input
-                                    [ Html.Attributes.type_ "range"
-                                    , Html.Attributes.min "20"
-                                    , Html.Attributes.max "150"
-                                    , Html.Attributes.step "10"
-                                    , Html.Attributes.value <| String.fromInt game.world.island.size
-                                    , Html.Events.onInput UpdateIslandSize
-                                    ]
-                                    []
-                                , Html.br [] []
-                                , Html.label [] [ Html.text ("Size: " ++ String.fromInt game.world.island.size) ]
-                                ]
-                            , Html.div [ Html.Attributes.class "inline-radio-selector" ]
-                                [ Html.div []
-                                    [ Html.input
-                                        [ Html.Attributes.type_ "radio"
-                                        , Html.Attributes.id "iType-typical"
-                                        , Html.Attributes.name "iType"
-                                        , Html.Attributes.value "typical"
-                                        , Html.Attributes.checked (game.world.island.iType == Island.IslandType.Vanilla)
-                                        , Html.Events.onInput UpdateIslandType
-                                        ]
-                                        []
-                                    , Html.br [] []
-                                    , Html.label [ Html.Attributes.for "iType-typical" ] [ Html.text "Typical" ]
-                                    ]
-                                , Html.div []
-                                    [ Html.input
-                                        [ Html.Attributes.type_ "radio"
-                                        , Html.Attributes.id "iType-woods"
-                                        , Html.Attributes.name "iType"
-                                        , Html.Attributes.value "woods"
-                                        , Html.Attributes.checked (game.world.island.iType == Island.IslandType.Woods)
-                                        , Html.Events.onInput UpdateIslandType
-                                        ]
-                                        []
-                                    , Html.br [] []
-                                    , Html.label [ Html.Attributes.for "iType-woods" ] [ Html.text "Woods" ]
-                                    ]
-                                , Html.div []
-                                    [ Html.input
-                                        [ Html.Attributes.type_ "radio"
-                                        , Html.Attributes.id "iType-cliffs"
-                                        , Html.Attributes.name "iType"
-                                        , Html.Attributes.value "cliffs"
-                                        , Html.Attributes.checked (game.world.island.iType == Island.IslandType.Cliffs)
-                                        , Html.Events.onInput UpdateIslandType
-                                        ]
-                                        []
-                                    , Html.br [] []
-                                    , Html.label [ Html.Attributes.for "iType-cliffs" ] [ Html.text "Cliffs" ]
-                                    ]
-                                , Html.div []
-                                    [ Html.input
-                                        [ Html.Attributes.type_ "radio"
-                                        , Html.Attributes.id "iType-mountains"
-                                        , Html.Attributes.name "iType"
-                                        , Html.Attributes.value "mountains"
-                                        , Html.Attributes.checked (game.world.island.iType == Island.IslandType.Mountains)
-                                        , Html.Events.onInput UpdateIslandType
-                                        ]
-                                        []
-                                    , Html.br [] []
-                                    , Html.label [ Html.Attributes.for "iType-mountains" ] [ Html.text "Mountains" ]
-                                    ]
-                                ]
-                            ]
                         ]
                     ]
     in

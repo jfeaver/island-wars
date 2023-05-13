@@ -10,7 +10,12 @@
 
   <body>
     <script>
-      Elm.Main.init();
+      if (Elm.Main) {
+        Elm.Main.init();
+      }
+      if (Elm.Editor) {
+        Elm.Editor.init();
+      }
     </script>
   </body>
 </html>
