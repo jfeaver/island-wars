@@ -1,8 +1,18 @@
 canvas {
   border: 1px black solid;
-  width: 1000px;
-  height: 500px;
+  width: 1400px;
+  height: 600px;
   background-color: #004080;
+}
+
+.editor-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.editor-controls > div {
+  padding-left: 20px;
 }
 
 .inline-radio-selector {
@@ -10,5 +20,9 @@ canvas {
   flex-direction: row;
   justify-content: space-between;
   margin: auto;
+  width: 250px;
+}
+
+input[type="range"] {
   width: 250px;
 }

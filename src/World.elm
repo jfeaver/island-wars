@@ -46,7 +46,7 @@ init worldSeed =
 
 static : World
 static =
-    { permutationTable = Simplex.permutationTableFromInt 36
+    { permutationTable = Simplex.permutationTableFromInt 3636
     , island = starterIsland
     , islands =
         [ starterIsland

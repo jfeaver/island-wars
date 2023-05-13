@@ -28,15 +28,17 @@ type alias IslandHexagon =
 
 
 renderable : RenderableConfig -> Island -> Canvas.Renderable
-renderable { camera, worldHexSize, focus, noiseConfig, permutationTable } island =
+renderable config island =
     let
+        { camera, worldHexSize, focus, noiseConfig, permutationTable } =
+            config
+
         loc =
             Camera.locate camera
 
         -- px units
         hexSize =
-            Camera.distance camera worldHexSize
-                / focus
+            Camera.distance camera worldHexSize / focus
 
         -- world units
         maxRadius =
@@ -115,16 +117,20 @@ renderable { camera, worldHexSize, focus, noiseConfig, permutationTable } island
                     Simplex.fractal2d noiseConfig permutationTable x y
 
                 positiveNoise =
-                    rawNoise
-                        + 1
+                    rawNoise + 1
 
                 -- Noise values below this won't be used (elevation will be zero)
                 noiseThreshold =
                     0.7
 
+                fadeMultiplier =
+                    1
+
+                lumpinessFactor =
+                    1.5
+
                 fadedNoise =
-                    positiveNoise
-                        * (1 - (fade ^ 1.7))
+                    positiveNoise * fadeMultiplier * (1 - (fade ^ lumpinessFactor))
 
                 thresholdedNoise =
                     if fadedNoise < noiseThreshold then

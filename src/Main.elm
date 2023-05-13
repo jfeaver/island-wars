@@ -7,7 +7,6 @@ import Html exposing (button, div, text)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Island.IslandType exposing (IslandType)
-import Random
 import World exposing (World)
 
 
