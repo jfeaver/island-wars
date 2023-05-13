@@ -33,6 +33,7 @@ init worldSeed =
                 }
     in
     { permutationTable = worldSeed.permutationTable
+    , island = singleIsland
     , islands =
         [ singleIsland
         ]
@@ -44,6 +45,7 @@ init worldSeed =
 
 type alias World =
     { permutationTable : Simplex.PermutationTable
+    , island : Island
     , islands : List Island
     , godsHand : Bool -- Is the cursor over some clickable entity?
     , activeIsland : Maybe Island

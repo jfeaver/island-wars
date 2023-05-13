@@ -72,12 +72,28 @@ setGameFocus game focus =
     { game | world = focusedWorld }
 
 
+setGameSize : Game -> Int -> Game
+setGameSize game size =
+    let
+        island =
+            game.world.island
+
+        world =
+            game.world
+
+        sizedIsland =
+            { island | size = size }
+    in
+    { game | world = { world | island = sizedIsland, islands = [ sizedIsland ] } }
+
+
 type Msg
     = StartGame
     | SeedWorld World.Seed
     | WorldMsg World.Msg
     | CameraZoom String
     | WorldFocus String
+    | UpdateIslandSize String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -138,6 +154,23 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        UpdateIslandSize text ->
+            case model of
+                InGame game ->
+                    let
+                        mSize =
+                            String.toInt text
+                    in
+                    case mSize of
+                        Just size ->
+                            ( InGame <| setGameSize game size, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 
 --- VIEW
@@ -160,7 +193,7 @@ view model =
                                 [ Html.input
                                     [ Html.Attributes.type_ "range"
                                     , Html.Attributes.min "0.1"
-                                    , Html.Attributes.max "3"
+                                    , Html.Attributes.max "5"
                                     , Html.Attributes.step "0.1"
                                     , Html.Attributes.value <| String.fromFloat (Camera.getZoom game.worldCamera)
                                     , Html.Events.onInput CameraZoom
@@ -173,7 +206,7 @@ view model =
                                 [ Html.input
                                     [ Html.Attributes.type_ "range"
                                     , Html.Attributes.min "0.1"
-                                    , Html.Attributes.max "3"
+                                    , Html.Attributes.max "5"
                                     , Html.Attributes.step "0.1"
                                     , Html.Attributes.value <| String.fromFloat game.world.focus
                                     , Html.Events.onInput WorldFocus
@@ -181,6 +214,19 @@ view model =
                                     []
                                 , Html.br [] []
                                 , Html.label [] [ Html.text ("Focus: " ++ String.fromFloat game.world.focus) ]
+                                ]
+                            , Html.div []
+                                [ Html.input
+                                    [ Html.Attributes.type_ "range"
+                                    , Html.Attributes.min "20"
+                                    , Html.Attributes.max "150"
+                                    , Html.Attributes.step "10"
+                                    , Html.Attributes.value <| String.fromInt game.world.island.size
+                                    , Html.Events.onInput UpdateIslandSize
+                                    ]
+                                    []
+                                , Html.br [] []
+                                , Html.label [] [ Html.text ("Size: " ++ String.fromInt game.world.island.size) ]
                                 ]
                             ]
                         ]
