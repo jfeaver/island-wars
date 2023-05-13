@@ -1,3 +1,6 @@
 canvas {
   border: 1px black solid;
+  width: 1000px;
+  height: 500px;
+  background-color: #004080;
 }

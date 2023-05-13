@@ -1,23 +1,37 @@
-module Island.View exposing (..)
+module Island.View exposing (RenderableConfig, renderable)
 
 import Camera exposing (Camera2D)
 import Canvas exposing (lineTo, path, shapes)
 import Canvas.Settings exposing (fill, stroke)
-import Color
 import Coordinate exposing (Coordinate)
 import Hexagon
 import Island exposing (Island)
+import Island.Elevation
 import Point exposing (Point)
+import Simplex
 
 
-renderable : Camera2D -> Float -> Island -> Canvas.Renderable
-renderable camera focus island =
+type alias RenderableConfig =
+    { camera : Camera2D
+    , worldHexSize : Float
+    , focus : Float
+    , noiseConfig : Simplex.FractalConfig
+    , permutationTable : Simplex.PermutationTable
+    }
+
+
+type alias IslandHexagon =
+    { center : Point
+    , corners : ( Point, List Point )
+    , fade : Float -- the fraction towards the beach it is
+    }
+
+
+renderable : RenderableConfig -> Island -> Canvas.Renderable
+renderable { camera, worldHexSize, focus, noiseConfig, permutationTable } island =
     let
         loc =
             Camera.locate camera
-
-        worldHexSize =
-            10
 
         -- px units
         hexSize =
@@ -71,12 +85,23 @@ renderable camera focus island =
             in
             List.map relToWorld allHexagonRelativeLocations
 
-        allHexagons : List ( Canvas.Point, List Canvas.Point )
+        allHexagons : List IslandHexagon
         allHexagons =
             let
                 removeHexagonsBeyondMaxRadius ( xc, yc ) ( x, y ) soFar =
-                    if (x - xc) ^ 2 + (y - yc) ^ 2 < maxRadius ^ 2 then
-                        Hexagon.corners hexSize (loc ( x, y )) :: soFar
+                    let
+                        radiusSquared =
+                            (x - xc) ^ 2 + (y - yc) ^ 2
+
+                        maxRadiusSquared =
+                            maxRadius ^ 2
+                    in
+                    if radiusSquared < maxRadiusSquared then
+                        { center = ( x, y )
+                        , corners = Hexagon.corners hexSize (loc ( x, y ))
+                        , fade = radiusSquared / maxRadiusSquared
+                        }
+                            :: soFar
 
                     else
                         soFar
@@ -84,8 +109,50 @@ renderable camera focus island =
             allHexagonWorldLocations
                 |> List.foldl (removeHexagonsBeyondMaxRadius island.center) []
 
-        hexagonRenderable ( firstPoint, others ) =
-            shapes [ stroke Color.darkPurple, fill Color.purple ]
+        elevationAt ( x, y ) fade =
+            let
+                rawNoise =
+                    Simplex.fractal2d noiseConfig permutationTable x y
+
+                positiveNoise =
+                    rawNoise
+                        + 1
+
+                fadedNoise =
+                    positiveNoise
+                        * (1 - (fade ^ 1.5))
+
+                -- Noise values below this won't be used (elevation will be zero)
+                noiseThreshold =
+                    0.6
+
+                thresholdedNoise =
+                    if fadedNoise < noiseThreshold then
+                        0
+
+                    else
+                        (fadedNoise - noiseThreshold) / (2 - noiseThreshold)
+
+                -- How many possible elevation values are there?
+                maxElevation =
+                    22
+            in
+            thresholdedNoise
+                * maxElevation
+                |> ceiling
+
+        hexagonRenderable { center, corners, fade } =
+            let
+                ( firstPoint, others ) =
+                    corners
+
+                elevation =
+                    elevationAt center fade
+
+                color =
+                    Island.Elevation.color island elevation
+            in
+            shapes [ stroke color, fill color ]
                 [ path
                     firstPoint
                     (others |> List.map lineTo)

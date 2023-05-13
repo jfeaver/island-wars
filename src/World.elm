@@ -3,16 +3,23 @@ module World exposing (..)
 import Camera exposing (Camera2D)
 import Canvas exposing (rect, shapes)
 import Canvas.Settings exposing (fill)
-import Color
 import Html exposing (Html)
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse exposing (Button(..), Event, onClick, onMove)
 import Island exposing (Island)
 import Island.IslandType exposing (IslandType(..))
+import Island.LandType
 import Island.View
 import Point
 import Random
 import Simplex
+
+
+{-| world units
+-}
+hexSize : Float
+hexSize =
+    8
 
 
 init : Seed -> World
@@ -20,7 +27,7 @@ init worldSeed =
     let
         singleIsland =
             Island.init
-                { center = ( 0, 0 )
+                { center = ( 37, 13 )
                 , size = 70
                 , iType = Vanilla
                 }
@@ -31,7 +38,7 @@ init worldSeed =
         ]
     , godsHand = False
     , activeIsland = Just singleIsland
-    , focus = 1
+    , focus = 3
     }
 
 
@@ -98,15 +105,29 @@ ocean camera =
                 |> Camera.getViewport
                 |> Point.fromCoordinate
     in
-    shapes [ fill (Color.rgb255 0 64 128) ] [ rect ( 0, 0 ) width height ]
+    shapes [ fill <| Island.LandType.toColor Island.LandType.Ocean ] [ rect ( 0, 0 ) width height ]
 
 
 view : World -> Camera2D -> Html Msg
 view world camera =
     let
+        islandRenderConfig : Island.View.RenderableConfig
+        islandRenderConfig =
+            { camera = camera
+            , worldHexSize = hexSize
+            , focus = world.focus
+            , permutationTable = world.permutationTable
+            , noiseConfig =
+                { steps = 3
+                , stepSize = 2.0
+                , persistence = 2.0
+                , scale = hexSize * 2
+                }
+            }
+
         islands =
             world.islands
-                |> List.map (Island.View.renderable camera world.focus)
+                |> List.map (Island.View.renderable islandRenderConfig)
                 |> Canvas.group []
 
         renderables =

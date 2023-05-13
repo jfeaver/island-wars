@@ -5,6 +5,10 @@ type alias Size =
     Float
 
 
+{-| Members of the tuples here correspond to cos(theta) and sin(theta)
+--| respectively where theta is the angle through the starting point then the
+--| center then the corresponding point of the hexagon
+-}
 hexUnitPoints : ( ( Float, Float ), List ( Float, Float ) )
 hexUnitPoints =
     let

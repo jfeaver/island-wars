@@ -1,6 +1,7 @@
 module Island.Elevation exposing (..)
 
 import Color
+import Island exposing (Island)
 import Island.IslandType exposing (IslandType(..))
 import Island.LandType as LandType exposing (LandType(..))
 
@@ -113,7 +114,7 @@ landType iType elevation =
                 cliffsLands
 
 
-color : IslandType -> Elevation -> Color.Color
-color iType elevation =
+color : Island -> Elevation -> Color.Color
+color { iType } elevation =
     landType iType elevation
         |> LandType.toColor
