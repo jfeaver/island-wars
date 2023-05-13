@@ -140,8 +140,8 @@ setElevationScalar game elevationScalar =
     { game | world = updatedWorld }
 
 
-setcircleFactor : Game -> Float -> Game
-setcircleFactor game circleFactor =
+setCircleFactor : Game -> Float -> Game
+setCircleFactor game circleFactor =
     let
         world =
             game.world
@@ -158,6 +158,78 @@ setcircleFactor game circleFactor =
     { game | world = updatedWorld }
 
 
+setNoiseSteps : Game -> Int -> Game
+setNoiseSteps game steps =
+    let
+        world =
+            game.world
+
+        noiseConfig =
+            world.noiseConfig
+
+        updatedNoiseConfig =
+            { noiseConfig | steps = steps }
+
+        updatedWorld =
+            { world | noiseConfig = updatedNoiseConfig }
+    in
+    { game | world = updatedWorld }
+
+
+setNoisePersistence : Game -> Float -> Game
+setNoisePersistence game persistence =
+    let
+        world =
+            game.world
+
+        noiseConfig =
+            world.noiseConfig
+
+        updatedNoiseConfig =
+            { noiseConfig | persistence = persistence }
+
+        updatedWorld =
+            { world | noiseConfig = updatedNoiseConfig }
+    in
+    { game | world = updatedWorld }
+
+
+setNoiseScale : Game -> Float -> Game
+setNoiseScale game scale =
+    let
+        world =
+            game.world
+
+        noiseConfig =
+            world.noiseConfig
+
+        updatedNoiseConfig =
+            { noiseConfig | scale = scale * World.hexSize }
+
+        updatedWorld =
+            { world | noiseConfig = updatedNoiseConfig }
+    in
+    { game | world = updatedWorld }
+
+
+setNoiseStepSize : Game -> Float -> Game
+setNoiseStepSize game stepSize =
+    let
+        world =
+            game.world
+
+        noiseConfig =
+            world.noiseConfig
+
+        updatedNoiseConfig =
+            { noiseConfig | stepSize = stepSize }
+
+        updatedWorld =
+            { world | noiseConfig = updatedNoiseConfig }
+    in
+    { game | world = updatedWorld }
+
+
 type Msg
     = StartGame
     | SeedWorld World.Seed
@@ -169,6 +241,10 @@ type Msg
     | OceanElevation String
     | CircleFactor String
     | ElevationScalar String
+    | NoiseSteps String
+    | NoiseStepSize String
+    | Persistence String
+    | Scale String
     | Regenerate
     | RegenerateHelper Simplex.PermutationTable
 
@@ -241,7 +317,19 @@ update msg model =
             updateFromInput model text String.toFloat setElevationScalar
 
         CircleFactor text ->
-            updateFromInput model text String.toFloat setcircleFactor
+            updateFromInput model text String.toFloat setCircleFactor
+
+        NoiseSteps text ->
+            updateFromInput model text String.toInt setNoiseSteps
+
+        NoiseStepSize text ->
+            updateFromInput model text String.toFloat setNoiseStepSize
+
+        Persistence text ->
+            updateFromInput model text String.toFloat setNoisePersistence
+
+        Scale text ->
+            updateFromInput model text String.toFloat setNoiseScale
 
         Regenerate ->
             ( model, Random.generate RegenerateHelper Simplex.permutationTableGenerator )
@@ -296,6 +384,7 @@ editorControls : Game -> Html Msg
 editorControls game =
     Html.div [ Html.Attributes.class "editor-controls" ]
         [ editorInputs game
+        , noiseInputs game
         , advancedInputs game
         , Html.div [] [ Html.button [ Html.Events.onClick Regenerate ] [ text "Regenerate" ] ]
         ]
@@ -303,6 +392,10 @@ editorControls game =
 
 advancedInputs : Game -> Html Msg
 advancedInputs game =
+    let
+        config =
+            game.world.generationConfig
+    in
     Html.div []
         [ Html.div []
             [ Html.input
@@ -310,12 +403,12 @@ advancedInputs game =
                 , Html.Attributes.min "0.0"
                 , Html.Attributes.max "1.5"
                 , Html.Attributes.step "0.05"
-                , Html.Attributes.value <| String.fromFloat game.world.generationConfig.oceanElevation
+                , Html.Attributes.value <| String.fromFloat config.oceanElevation
                 , Html.Events.onInput OceanElevation
                 ]
                 []
             , Html.br [] []
-            , Html.label [] [ Html.text ("Ocean Elevation: " ++ String.fromFloat game.world.generationConfig.oceanElevation) ]
+            , Html.label [] [ Html.text ("Ocean Elevation: " ++ String.fromFloat config.oceanElevation) ]
             ]
         , Html.div []
             [ Html.input
@@ -323,25 +416,87 @@ advancedInputs game =
                 , Html.Attributes.min "0.0"
                 , Html.Attributes.max "7.0"
                 , Html.Attributes.step "0.25"
-                , Html.Attributes.value <| String.fromFloat game.world.generationConfig.circleFactor
+                , Html.Attributes.value <| String.fromFloat config.circleFactor
                 , Html.Events.onInput CircleFactor
                 ]
                 []
             , Html.br [] []
-            , Html.label [] [ Html.text ("Lumpiness Factor: " ++ String.fromFloat game.world.generationConfig.circleFactor) ]
+            , Html.label [] [ Html.text ("Circle Factor: " ++ String.fromFloat config.circleFactor) ]
+            ]
+        , Html.div []
+            [ Html.input
+                [ Html.Attributes.type_ "range"
+                , Html.Attributes.min "0.1"
+                , Html.Attributes.max "1.5"
+                , Html.Attributes.step "0.1"
+                , Html.Attributes.value <| String.fromFloat config.elevationScalar
+                , Html.Events.onInput ElevationScalar
+                ]
+                []
+            , Html.br [] []
+            , Html.label [] [ Html.text ("Elevation Scalar: " ++ String.fromFloat config.elevationScalar) ]
+            ]
+        ]
+
+
+noiseInputs : Game -> Html Msg
+noiseInputs game =
+    let
+        config =
+            game.world.noiseConfig
+    in
+    Html.div []
+        [ Html.div []
+            [ Html.input
+                [ Html.Attributes.type_ "range"
+                , Html.Attributes.min "1"
+                , Html.Attributes.max "5"
+                , Html.Attributes.step "1"
+                , Html.Attributes.value <| String.fromInt config.steps
+                , Html.Events.onInput NoiseSteps
+                ]
+                []
+            , Html.br [] []
+            , Html.label [] [ Html.text ("Noise Steps: " ++ String.fromInt config.steps) ]
+            ]
+        , Html.div []
+            [ Html.input
+                [ Html.Attributes.type_ "range"
+                , Html.Attributes.min "1"
+                , Html.Attributes.max "3.5"
+                , Html.Attributes.step "0.1"
+                , Html.Attributes.value <| String.fromFloat config.stepSize
+                , Html.Events.onInput NoiseStepSize
+                ]
+                []
+            , Html.br [] []
+            , Html.label [] [ Html.text ("Noise Step Size: " ++ String.fromFloat config.stepSize) ]
             ]
         , Html.div []
             [ Html.input
                 [ Html.Attributes.type_ "range"
                 , Html.Attributes.min "0.0"
-                , Html.Attributes.max "3"
-                , Html.Attributes.step "0.1"
-                , Html.Attributes.value <| String.fromFloat game.world.generationConfig.elevationScalar
-                , Html.Events.onInput ElevationScalar
+                , Html.Attributes.max "5"
+                , Html.Attributes.step "0.25"
+                , Html.Attributes.value <| String.fromFloat config.persistence
+                , Html.Events.onInput Persistence
                 ]
                 []
             , Html.br [] []
-            , Html.label [] [ Html.text ("Elevation Scalar: " ++ String.fromFloat game.world.generationConfig.elevationScalar) ]
+            , Html.label [] [ Html.text ("Noise Persistence: " ++ String.fromFloat config.persistence) ]
+            ]
+        , Html.div []
+            [ Html.input
+                [ Html.Attributes.type_ "range"
+                , Html.Attributes.min "0.0"
+                , Html.Attributes.max "4"
+                , Html.Attributes.step "0.1"
+                , Html.Attributes.value <| String.fromFloat (config.scale / World.hexSize)
+                , Html.Events.onInput Scale
+                ]
+                []
+            , Html.br [] []
+            , Html.label [] [ Html.text ("Noise Scale: " ++ String.fromFloat (config.scale / World.hexSize)) ]
             ]
         ]
 
