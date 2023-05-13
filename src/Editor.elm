@@ -104,6 +104,60 @@ setIslandType game iType =
     { game | world = { world | island = typedIsland, islands = [ typedIsland ] } }
 
 
+setOceanElevation : Game -> Float -> Game
+setOceanElevation game elevation =
+    let
+        world =
+            game.world
+
+        generationConfig =
+            world.generationConfig
+
+        updatedGenerationConfig =
+            { generationConfig | oceanElevation = elevation }
+
+        updatedWorld =
+            { world | generationConfig = updatedGenerationConfig }
+    in
+    { game | world = updatedWorld }
+
+
+setElevationScalar : Game -> Float -> Game
+setElevationScalar game elevationScalar =
+    let
+        world =
+            game.world
+
+        generationConfig =
+            world.generationConfig
+
+        updatedGenerationConfig =
+            { generationConfig | elevationScalar = elevationScalar }
+
+        updatedWorld =
+            { world | generationConfig = updatedGenerationConfig }
+    in
+    { game | world = updatedWorld }
+
+
+setcircleFactor : Game -> Float -> Game
+setcircleFactor game circleFactor =
+    let
+        world =
+            game.world
+
+        generationConfig =
+            world.generationConfig
+
+        updatedGenerationConfig =
+            { generationConfig | circleFactor = circleFactor }
+
+        updatedWorld =
+            { world | generationConfig = updatedGenerationConfig }
+    in
+    { game | world = updatedWorld }
+
+
 type Msg
     = StartGame
     | SeedWorld World.Seed
@@ -112,6 +166,9 @@ type Msg
     | WorldFocus String
     | UpdateIslandSize String
     | UpdateIslandType String
+    | OceanElevation String
+    | CircleFactor String
+    | ElevationScalar String
     | Regenerate
     | RegenerateHelper Simplex.PermutationTable
 
@@ -177,6 +234,15 @@ update msg model =
         UpdateIslandType text ->
             updateFromInput model text Island.IslandType.fromString setIslandType
 
+        OceanElevation text ->
+            updateFromInput model text String.toFloat setOceanElevation
+
+        ElevationScalar text ->
+            updateFromInput model text String.toFloat setElevationScalar
+
+        CircleFactor text ->
+            updateFromInput model text String.toFloat setcircleFactor
+
         Regenerate ->
             ( model, Random.generate RegenerateHelper Simplex.permutationTableGenerator )
 
@@ -200,9 +266,9 @@ update msg model =
 
 --- VIEW
 -- TODO:
--- 2. Add inputs for noise threshold, fadeMultiplier, lumpinessFactor
 -- 3. Figure out itch.io requirements
 -- 4. Build and upload
+-- 5. Add inputs for noise config?
 
 
 view : Model -> Browser.Document Msg
@@ -230,7 +296,53 @@ editorControls : Game -> Html Msg
 editorControls game =
     Html.div [ Html.Attributes.class "editor-controls" ]
         [ editorInputs game
+        , advancedInputs game
         , Html.div [] [ Html.button [ Html.Events.onClick Regenerate ] [ text "Regenerate" ] ]
+        ]
+
+
+advancedInputs : Game -> Html Msg
+advancedInputs game =
+    Html.div []
+        [ Html.div []
+            [ Html.input
+                [ Html.Attributes.type_ "range"
+                , Html.Attributes.min "0.0"
+                , Html.Attributes.max "1.5"
+                , Html.Attributes.step "0.05"
+                , Html.Attributes.value <| String.fromFloat game.world.generationConfig.oceanElevation
+                , Html.Events.onInput OceanElevation
+                ]
+                []
+            , Html.br [] []
+            , Html.label [] [ Html.text ("Ocean Elevation: " ++ String.fromFloat game.world.generationConfig.oceanElevation) ]
+            ]
+        , Html.div []
+            [ Html.input
+                [ Html.Attributes.type_ "range"
+                , Html.Attributes.min "0.0"
+                , Html.Attributes.max "7.0"
+                , Html.Attributes.step "0.25"
+                , Html.Attributes.value <| String.fromFloat game.world.generationConfig.circleFactor
+                , Html.Events.onInput CircleFactor
+                ]
+                []
+            , Html.br [] []
+            , Html.label [] [ Html.text ("Lumpiness Factor: " ++ String.fromFloat game.world.generationConfig.circleFactor) ]
+            ]
+        , Html.div []
+            [ Html.input
+                [ Html.Attributes.type_ "range"
+                , Html.Attributes.min "0.0"
+                , Html.Attributes.max "3"
+                , Html.Attributes.step "0.1"
+                , Html.Attributes.value <| String.fromFloat game.world.generationConfig.elevationScalar
+                , Html.Events.onInput ElevationScalar
+                ]
+                []
+            , Html.br [] []
+            , Html.label [] [ Html.text ("Elevation Scalar: " ++ String.fromFloat game.world.generationConfig.elevationScalar) ]
+            ]
         ]
 
 

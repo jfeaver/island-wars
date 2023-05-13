@@ -1,4 +1,4 @@
-module Island.View exposing (RenderableConfig, renderable)
+module Island.View exposing (GenerationConfig, RenderableConfig, renderable)
 
 import Camera exposing (Camera2D)
 import Canvas exposing (lineTo, path, shapes)
@@ -11,12 +11,20 @@ import Point exposing (Point)
 import Simplex
 
 
+type alias GenerationConfig =
+    { oceanElevation : Float
+    , elevationScalar : Float
+    , circleFactor : Float
+    }
+
+
 type alias RenderableConfig =
     { camera : Camera2D
     , worldHexSize : Float
     , focus : Float
     , noiseConfig : Simplex.FractalConfig
     , permutationTable : Simplex.PermutationTable
+    , generationConfig : GenerationConfig
     }
 
 
@@ -48,7 +56,7 @@ renderable config island =
         relativeGridLocations =
             let
                 maxGridRadius =
-                    maxRadius * focus / Hexagon.gridSpacing worldHexSize |> ceiling
+                    maxRadius * focus / Hexagon.horizontalSpacing worldHexSize |> floor
             in
             List.range -maxGridRadius maxGridRadius
 
@@ -121,16 +129,16 @@ renderable config island =
 
                 -- Noise values below this won't be used (elevation will be zero)
                 noiseThreshold =
-                    0.7
+                    config.generationConfig.oceanElevation
 
                 fadeMultiplier =
-                    1
+                    config.generationConfig.elevationScalar
 
-                lumpinessFactor =
-                    1.5
+                circleFactor =
+                    config.generationConfig.circleFactor
 
                 fadedNoise =
-                    positiveNoise * fadeMultiplier * (1 - (fade ^ lumpinessFactor))
+                    positiveNoise * fadeMultiplier * (1 - (fade ^ circleFactor))
 
                 thresholdedNoise =
                     if fadedNoise < noiseThreshold then

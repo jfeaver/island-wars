@@ -33,15 +33,7 @@ starterIsland =
 
 init : Seed -> World
 init worldSeed =
-    { permutationTable = worldSeed.permutationTable
-    , island = starterIsland
-    , islands =
-        [ starterIsland
-        ]
-    , godsHand = False
-    , activeIsland = Just starterIsland
-    , focus = 5
-    }
+    { static | permutationTable = worldSeed.permutationTable }
 
 
 static : World
@@ -54,11 +46,24 @@ static =
     , godsHand = False
     , activeIsland = Just starterIsland
     , focus = 5
+    , noiseConfig =
+        { steps = 3
+        , stepSize = 2.0
+        , persistence = 2.0
+        , scale = hexSize * 2
+        }
+    , generationConfig =
+        { oceanElevation = 0.7
+        , elevationScalar = 1
+        , circleFactor = 1.5
+        }
     }
 
 
 type alias World =
     { permutationTable : Simplex.PermutationTable
+    , noiseConfig : Simplex.FractalConfig
+    , generationConfig : Island.View.GenerationConfig
     , island : Island
     , islands : List Island
     , godsHand : Bool -- Is the cursor over some clickable entity?
@@ -133,12 +138,8 @@ view world camera =
             , worldHexSize = hexSize
             , focus = world.focus
             , permutationTable = world.permutationTable
-            , noiseConfig =
-                { steps = 3
-                , stepSize = 2.0
-                , persistence = 2.0
-                , scale = hexSize * 2
-                }
+            , noiseConfig = world.noiseConfig
+            , generationConfig = world.generationConfig
             }
 
         islands =
