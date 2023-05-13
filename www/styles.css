@@ -4,3 +4,11 @@ canvas {
   height: 500px;
   background-color: #004080;
 }
+
+.inline-radio-selector {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: auto;
+  width: 250px;
+}

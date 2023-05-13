@@ -6,6 +6,7 @@ import Canvas.Settings.Text exposing (TextAlign(..))
 import Html exposing (button, div, text)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
+import Island.IslandType exposing (IslandType)
 import Random
 import World exposing (World)
 
@@ -87,6 +88,21 @@ setGameSize game size =
     { game | world = { world | island = sizedIsland, islands = [ sizedIsland ] } }
 
 
+setIslandType : Game -> IslandType -> Game
+setIslandType game iType =
+    let
+        island =
+            game.world.island
+
+        world =
+            game.world
+
+        typedIsland =
+            { island | iType = iType }
+    in
+    { game | world = { world | island = typedIsland, islands = [ typedIsland ] } }
+
+
 type Msg
     = StartGame
     | SeedWorld World.Seed
@@ -94,6 +110,7 @@ type Msg
     | CameraZoom String
     | WorldFocus String
     | UpdateIslandSize String
+    | UpdateIslandType String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -171,6 +188,23 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        UpdateIslandType text ->
+            case model of
+                InGame game ->
+                    let
+                        mType =
+                            Island.IslandType.fromString text
+                    in
+                    case mType of
+                        Just iType ->
+                            ( InGame <| setIslandType game iType, Cmd.none )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 
 --- VIEW
@@ -227,6 +261,60 @@ view model =
                                     []
                                 , Html.br [] []
                                 , Html.label [] [ Html.text ("Size: " ++ String.fromInt game.world.island.size) ]
+                                ]
+                            , Html.div [ Html.Attributes.class "inline-radio-selector" ]
+                                [ Html.div []
+                                    [ Html.input
+                                        [ Html.Attributes.type_ "radio"
+                                        , Html.Attributes.id "iType-typical"
+                                        , Html.Attributes.name "iType"
+                                        , Html.Attributes.value "typical"
+                                        , Html.Attributes.checked (game.world.island.iType == Island.IslandType.Vanilla)
+                                        , Html.Events.onInput UpdateIslandType
+                                        ]
+                                        []
+                                    , Html.br [] []
+                                    , Html.label [ Html.Attributes.for "iType-typical" ] [ Html.text "Typical" ]
+                                    ]
+                                , Html.div []
+                                    [ Html.input
+                                        [ Html.Attributes.type_ "radio"
+                                        , Html.Attributes.id "iType-woods"
+                                        , Html.Attributes.name "iType"
+                                        , Html.Attributes.value "woods"
+                                        , Html.Attributes.checked (game.world.island.iType == Island.IslandType.Woods)
+                                        , Html.Events.onInput UpdateIslandType
+                                        ]
+                                        []
+                                    , Html.br [] []
+                                    , Html.label [ Html.Attributes.for "iType-woods" ] [ Html.text "Woods" ]
+                                    ]
+                                , Html.div []
+                                    [ Html.input
+                                        [ Html.Attributes.type_ "radio"
+                                        , Html.Attributes.id "iType-cliffs"
+                                        , Html.Attributes.name "iType"
+                                        , Html.Attributes.value "cliffs"
+                                        , Html.Attributes.checked (game.world.island.iType == Island.IslandType.Cliffs)
+                                        , Html.Events.onInput UpdateIslandType
+                                        ]
+                                        []
+                                    , Html.br [] []
+                                    , Html.label [ Html.Attributes.for "iType-cliffs" ] [ Html.text "Cliffs" ]
+                                    ]
+                                , Html.div []
+                                    [ Html.input
+                                        [ Html.Attributes.type_ "radio"
+                                        , Html.Attributes.id "iType-mountains"
+                                        , Html.Attributes.name "iType"
+                                        , Html.Attributes.value "mountains"
+                                        , Html.Attributes.checked (game.world.island.iType == Island.IslandType.Mountains)
+                                        , Html.Events.onInput UpdateIslandType
+                                        ]
+                                        []
+                                    , Html.br [] []
+                                    , Html.label [ Html.Attributes.for "iType-mountains" ] [ Html.text "Mountains" ]
+                                    ]
                                 ]
                             ]
                         ]

@@ -12,7 +12,7 @@ toString : IslandType -> String
 toString islandType =
     case islandType of
         Vanilla ->
-            ""
+            "typical"
 
         Woods ->
             "woods"
@@ -27,7 +27,7 @@ toString islandType =
 fromString : String -> Maybe IslandType
 fromString string =
     case string of
-        "" ->
+        "typical" ->
             Just Vanilla
 
         "woods" ->

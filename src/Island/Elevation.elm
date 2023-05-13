@@ -40,22 +40,22 @@ landType iType elevation =
                 Mountain2
 
         mountainsLands =
-            if elevation < 3 then
+            if elevation < 2 then
                 Beach1
 
-            else if elevation < 5 then
+            else if elevation < 3 then
                 Beach2
 
             else if elevation < 8 then
                 Stones1
 
-            else if elevation < 11 then
+            else if elevation < 9 then
                 Stones2
 
-            else if elevation < 13 then
+            else if elevation < 11 then
                 Stones3
 
-            else if elevation < 16 then
+            else if elevation < 13 then
                 Mountain1
 
             else
