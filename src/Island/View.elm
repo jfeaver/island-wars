@@ -12,7 +12,6 @@ import Point exposing (Point)
 
 renderable : Camera2D -> Float -> Island -> Canvas.Renderable
 renderable camera focus island =
-    -- FIXME: This is taking a looong time to render (esp at high zoom or high focus)
     let
         loc =
             Camera.locate camera
@@ -33,7 +32,7 @@ renderable camera focus island =
         relativeGridLocations =
             let
                 maxGridRadius =
-                    Camera.distance camera maxRadius * focus |> floor
+                    maxRadius * focus / Hexagon.gridSpacing worldHexSize |> ceiling
             in
             List.range -maxGridRadius maxGridRadius
 
@@ -67,7 +66,7 @@ renderable camera focus island =
                                 0
                     in
                     ( toFloat xr * Hexagon.horizontalSpacing (worldHexSize / focus) + xc
-                    , toFloat yr * vert + yc + vertShove
+                    , toFloat yr * vert + vertShove + yc
                     )
             in
             List.map relToWorld allHexagonRelativeLocations
@@ -75,15 +74,15 @@ renderable camera focus island =
         allHexagons : List ( Canvas.Point, List Canvas.Point )
         allHexagons =
             let
-                removeHexagonsBeyondMaxRadius ( x, y ) soFar =
-                    if x ^ 2 + y ^ 2 < maxRadius ^ 2 then
+                removeHexagonsBeyondMaxRadius ( xc, yc ) ( x, y ) soFar =
+                    if (x - xc) ^ 2 + (y - yc) ^ 2 < maxRadius ^ 2 then
                         Hexagon.corners hexSize (loc ( x, y )) :: soFar
 
                     else
                         soFar
             in
             allHexagonWorldLocations
-                |> List.foldl removeHexagonsBeyondMaxRadius []
+                |> List.foldl (removeHexagonsBeyondMaxRadius island.center) []
 
         hexagonRenderable ( firstPoint, others ) =
             shapes [ stroke Color.darkPurple, fill Color.purple ]

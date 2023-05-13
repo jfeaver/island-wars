@@ -20,7 +20,7 @@ init worldSeed =
     let
         singleIsland =
             Island.init
-                { center = ( 0, 0 ) -- FIXME: This doesn't affect where it is rendered
+                { center = ( 0, 0 )
                 , size = 70
                 , iType = Vanilla
                 }
