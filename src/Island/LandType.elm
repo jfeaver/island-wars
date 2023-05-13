@@ -92,46 +92,46 @@ toColor : LandType -> Color.Color
 toColor landType =
     case landType of
         Ocean ->
-            Color.rgb255 0 64 128
+            Color.rgb255 0x00 0x40 0x80
 
         Beach1 ->
-            Color.rgb255 249 211 50
+            Color.rgb255 0xF9 0xD3 0x32
 
         Beach2 ->
-            Color.rgb255 249 236 50
+            Color.rgb255 0xF9 0xEC 0x32
 
         Grass1 ->
-            Color.rgb255 86 201 54
+            Color.rgb255 0x56 0xC9 0x36
 
         Grass2 ->
-            Color.rgb255 77 178 49
+            Color.rgb255 0x4D 0xB2 0x31
 
         Trees1 ->
-            Color.rgb255 58 134 37
+            Color.rgb255 0x3A 0x86 0x25
 
         Trees2 ->
-            Color.rgb255 40 113 20
+            Color.rgb255 0x28 0x71 0x14
 
         Trees3 ->
-            Color.rgb255 20 88 2
+            Color.rgb255 0x14 0x58 0x02
 
         Mountain1 ->
-            Color.rgb255 196 224 224
+            Color.rgb255 0xC4 0xE0 0xE0
 
         Mountain2 ->
-            Color.rgb255 241 255 255
+            Color.rgb255 0xF1 0xFF 0xFF
 
         Stones1 ->
-            Color.rgb255 125 115 107
+            Color.rgb255 0x7D 0x73 0x6B
 
         Stones2 ->
-            Color.rgb255 113 100 91
+            Color.rgb255 0x71 0x64 0x5B
 
         Stones3 ->
-            Color.rgb255 102 89 79
+            Color.rgb255 0x66 0x59 0x4F
 
         Cliffs1 ->
-            Color.rgb255 232 224 217
+            Color.rgb255 0xE8 0xE0 0xD9
 
         Cliffs2 ->
-            Color.rgb255 242 242 238
+            Color.rgb255 0xF2 0xF2 0xEE
