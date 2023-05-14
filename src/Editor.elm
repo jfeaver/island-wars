@@ -3,12 +3,11 @@ module Editor exposing (..)
 import Browser
 import Camera exposing (Camera2D)
 import Canvas.Settings.Text exposing (TextAlign(..))
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, text)
 import Html.Attributes exposing (style)
-import Html.Events exposing (onClick)
-import Island.IslandType exposing (IslandType)
+import Html.Events
+import Island.IslandType exposing (IslandType(..))
 import Random
-import Simplex
 import World exposing (World)
 
 
@@ -26,12 +25,7 @@ main =
 --- MODEL
 
 
-type Model
-    = MainMenu
-    | InGame Game
-
-
-type alias Game =
+type alias Model =
     { world : World
     , worldCamera : Camera2D
     }
@@ -39,21 +33,18 @@ type alias Game =
 
 init : () -> ( Model, Cmd Msg )
 init =
-    always <| update StartGame MainMenu
-
-
-gameInit : World.Seed -> Game
-gameInit worldSeed =
-    { world = World.init worldSeed
-    , worldCamera = Camera.init ( 1400, 600 )
-    }
+    always <|
+        update Regenerate
+            { world = World.static
+            , worldCamera = Camera.init ( 1400, 600 )
+            }
 
 
 
 --- UPDATE
 
 
-setGameZoom : Game -> Float -> Game
+setGameZoom : Model -> Float -> Model
 setGameZoom game newZoom =
     let
         zoomedCamera =
@@ -62,7 +53,7 @@ setGameZoom game newZoom =
     { game | worldCamera = zoomedCamera }
 
 
-setGameFocus : Game -> Float -> Game
+setGameFocus : Model -> Float -> Model
 setGameFocus game focus =
     let
         world =
@@ -74,7 +65,7 @@ setGameFocus game focus =
     { game | world = focusedWorld }
 
 
-setGameSize : Game -> Int -> Game
+setGameSize : Model -> Int -> Model
 setGameSize game size =
     let
         island =
@@ -89,7 +80,7 @@ setGameSize game size =
     { game | world = { world | island = sizedIsland, islands = [ sizedIsland ] } }
 
 
-setIslandType : Game -> IslandType -> Game
+setIslandType : Model -> IslandType -> Model
 setIslandType game iType =
     let
         island =
@@ -104,7 +95,7 @@ setIslandType game iType =
     { game | world = { world | island = typedIsland, islands = [ typedIsland ] } }
 
 
-setOceanElevation : Game -> Float -> Game
+setOceanElevation : Model -> Float -> Model
 setOceanElevation game elevation =
     let
         world =
@@ -122,7 +113,7 @@ setOceanElevation game elevation =
     { game | world = updatedWorld }
 
 
-setElevationScalar : Game -> Float -> Game
+setElevationScalar : Model -> Float -> Model
 setElevationScalar game elevationScalar =
     let
         world =
@@ -140,7 +131,7 @@ setElevationScalar game elevationScalar =
     { game | world = updatedWorld }
 
 
-setCircleFactor : Game -> Float -> Game
+setCircleFactor : Model -> Float -> Model
 setCircleFactor game circleFactor =
     let
         world =
@@ -158,7 +149,7 @@ setCircleFactor game circleFactor =
     { game | world = updatedWorld }
 
 
-setNoiseSteps : Game -> Int -> Game
+setNoiseSteps : Model -> Int -> Model
 setNoiseSteps game steps =
     let
         world =
@@ -176,7 +167,7 @@ setNoiseSteps game steps =
     { game | world = updatedWorld }
 
 
-setNoisePersistence : Game -> Float -> Game
+setNoisePersistence : Model -> Float -> Model
 setNoisePersistence game persistence =
     let
         world =
@@ -194,7 +185,7 @@ setNoisePersistence game persistence =
     { game | world = updatedWorld }
 
 
-setNoiseScale : Game -> Float -> Game
+setNoiseScale : Model -> Float -> Model
 setNoiseScale game scale =
     let
         world =
@@ -212,7 +203,7 @@ setNoiseScale game scale =
     { game | world = updatedWorld }
 
 
-setNoiseStepSize : Game -> Float -> Game
+setNoiseStepSize : Model -> Float -> Model
 setNoiseStepSize game stepSize =
     let
         world =
@@ -231,9 +222,7 @@ setNoiseStepSize game stepSize =
 
 
 type Msg
-    = StartGame
-    | SeedWorld World.Seed
-    | WorldMsg World.Msg
+    = WorldMsg World.Msg
     | CameraZoom String
     | WorldFocus String
     | UpdateIslandSize String
@@ -246,57 +235,35 @@ type Msg
     | Persistence String
     | Scale String
     | Regenerate
-    | RegenerateHelper Simplex.PermutationTable
+    | RegenerateHelper Int
 
 
-gameUpdate : Model -> (Game -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg )
-gameUpdate model updater =
-    case model of
-        InGame game ->
-            updater game
-
-        _ ->
-            ( model, Cmd.none )
-
-
-updateFromInput : Model -> String -> (String -> Maybe a) -> (Game -> a -> Game) -> ( Model, Cmd Msg )
+updateFromInput : Model -> String -> (String -> Maybe a) -> (Model -> a -> Model) -> ( Model, Cmd Msg )
 updateFromInput model inputText inputParser gameUpdater =
-    gameUpdate model
-        (\game ->
-            let
-                mInput =
-                    inputParser inputText
-            in
-            case mInput of
-                Just someInput ->
-                    ( InGame <| gameUpdater game someInput, Cmd.none )
+    let
+        mInput =
+            inputParser inputText
+    in
+    case mInput of
+        Just someInput ->
+            ( gameUpdater model someInput, Cmd.none )
 
-                Nothing ->
-                    ( model, Cmd.none )
-        )
+        Nothing ->
+            ( model, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        StartGame ->
-            ( model, Random.generate SeedWorld World.seed )
-
-        SeedWorld worldSeed ->
-            ( InGame (gameInit worldSeed), Cmd.none )
-
         WorldMsg worldMsg ->
-            gameUpdate model
-                (\game ->
-                    let
-                        ( updatedWorld, cmd ) =
-                            World.update worldMsg game.world
+            let
+                ( updatedWorld, cmd ) =
+                    World.update worldMsg model.world
 
-                        mainCmd =
-                            Cmd.map WorldMsg cmd
-                    in
-                    ( InGame { game | world = updatedWorld }, mainCmd )
-                )
+                mainCmd =
+                    Cmd.map WorldMsg cmd
+            in
+            ( { model | world = updatedWorld }, mainCmd )
 
         CameraZoom text ->
             updateFromInput model text String.toFloat setGameZoom
@@ -332,23 +299,20 @@ update msg model =
             updateFromInput model text String.toFloat setNoiseScale
 
         Regenerate ->
-            ( model, Random.generate RegenerateHelper Simplex.permutationTableGenerator )
+            ( model, Random.generate RegenerateHelper World.noiseSeedGenerator )
 
-        RegenerateHelper permutationTable ->
-            gameUpdate model
-                (\game ->
-                    let
-                        world =
-                            game.world
+        RegenerateHelper noiseSeed ->
+            let
+                world =
+                    model.world
 
-                        updatedWorld =
-                            { world | permutationTable = permutationTable }
+                updatedWorld =
+                    World.updateSeed world noiseSeed
 
-                        updatedGame =
-                            { game | world = updatedWorld }
-                    in
-                    ( InGame updatedGame, Cmd.none )
-                )
+                updatedGame =
+                    { model | world = updatedWorld }
+            in
+            ( updatedGame, Cmd.none )
 
 
 
@@ -360,37 +324,38 @@ update msg model =
 
 
 view : Model -> Browser.Document Msg
-view model =
+view game =
     let
         body =
-            case model of
-                MainMenu ->
-                    [ div [] [ button [ onClick StartGame ] [ text "New Game" ] ]
-                    ]
-
-                InGame game ->
-                    [ Html.div [ style "text-align" "center" ]
-                        [ World.view game.world game.worldCamera |> Html.map WorldMsg
-                        , editorControls game
-                        ]
-                    ]
+            [ Html.div [ style "text-align" "center" ]
+                [ World.view game.world game.worldCamera |> Html.map WorldMsg
+                , editorControls game
+                ]
+            ]
     in
     { title = "Island Wars"
     , body = body
     }
 
 
-editorControls : Game -> Html Msg
+editorControls : Model -> Html Msg
 editorControls game =
     Html.div [ Html.Attributes.class "editor-controls" ]
         [ editorInputs game
         , noiseInputs game
         , advancedInputs game
-        , Html.div [] [ Html.button [ Html.Events.onClick Regenerate ] [ text "New Island" ] ]
+        , changeIslandInputs game
         ]
 
 
-advancedInputs : Game -> Html Msg
+changeIslandInputs : Model -> Html Msg
+changeIslandInputs _ =
+    Html.div []
+        [ Html.div [] [ Html.button [ Html.Events.onClick Regenerate ] [ text "New Island" ] ]
+        ]
+
+
+advancedInputs : Model -> Html Msg
 advancedInputs game =
     let
         config =
@@ -439,7 +404,7 @@ advancedInputs game =
         ]
 
 
-noiseInputs : Game -> Html Msg
+noiseInputs : Model -> Html Msg
 noiseInputs game =
     let
         config =
@@ -501,7 +466,7 @@ noiseInputs game =
         ]
 
 
-editorInputs : Game -> Html Msg
+editorInputs : Model -> Html Msg
 editorInputs game =
     Html.div []
         [ Html.div []

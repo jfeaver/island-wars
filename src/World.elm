@@ -33,12 +33,18 @@ starterIsland =
 
 init : Seed -> World
 init worldSeed =
-    { static | permutationTable = worldSeed.permutationTable }
+    updateSeed static worldSeed.noiseSeed
+
+
+updateSeed : World -> Int -> World
+updateSeed world noiseSeed =
+    { world | permutationTable = Simplex.permutationTableFromInt noiseSeed, noiseSeed = noiseSeed }
 
 
 static : World
 static =
     { permutationTable = Simplex.permutationTableFromInt 3636
+    , noiseSeed = 3636
     , island = starterIsland
     , islands =
         [ starterIsland
@@ -62,6 +68,7 @@ static =
 
 type alias World =
     { permutationTable : Simplex.PermutationTable
+    , noiseSeed : Int
     , noiseConfig : Simplex.FractalConfig
     , generationConfig : Island.View.GenerationConfig
     , island : Island
@@ -75,7 +82,7 @@ type alias World =
 type alias Seed =
     { size : Int
     , iType : IslandType
-    , permutationTable : Simplex.PermutationTable
+    , noiseSeed : Int
     }
 
 
@@ -187,9 +194,14 @@ view world camera =
 --             Canvas.group [] []
 
 
+noiseSeedGenerator : Random.Generator Int
+noiseSeedGenerator =
+    Random.int 1000000 9999999
+
+
 seed : Random.Generator Seed
 seed =
     Random.map3 Seed
         Island.randomSizeGenerator
         Island.randomTypeGenerator
-        Simplex.permutationTableGenerator
+        noiseSeedGenerator
