@@ -9,3 +9,9 @@ editor() {
 fmt() {
   elm-format --yes src
 }
+
+build() {
+  mkdir -p dist/
+  cp www/* dist/
+  elm make src/Editor.elm --output=dist/main.js --optimize
+}

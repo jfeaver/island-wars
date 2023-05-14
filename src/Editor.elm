@@ -386,7 +386,7 @@ editorControls game =
         [ editorInputs game
         , noiseInputs game
         , advancedInputs game
-        , Html.div [] [ Html.button [ Html.Events.onClick Regenerate ] [ text "Regenerate" ] ]
+        , Html.div [] [ Html.button [ Html.Events.onClick Regenerate ] [ text "New Island" ] ]
         ]
 
 
@@ -415,7 +415,7 @@ advancedInputs game =
                 [ Html.Attributes.type_ "range"
                 , Html.Attributes.min "0.0"
                 , Html.Attributes.max "7.0"
-                , Html.Attributes.step "0.25"
+                , Html.Attributes.step "0.1"
                 , Html.Attributes.value <| String.fromFloat config.circleFactor
                 , Html.Events.onInput CircleFactor
                 ]

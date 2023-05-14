@@ -96,8 +96,11 @@ landType iType elevation =
             else
                 Mountain2
     in
-    if elevation == 0 then
+    if elevation <= -2 then
         Ocean
+
+    else if elevation <= 0 then
+        Shallows
 
     else
         case iType of

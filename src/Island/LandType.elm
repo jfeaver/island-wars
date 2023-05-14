@@ -5,6 +5,7 @@ import Color
 
 type LandType
     = Ocean
+    | Shallows
     | Beach1
     | Beach2
     | Grass1
@@ -26,6 +27,9 @@ toString landType =
     case landType of
         Ocean ->
             "ocean"
+
+        Shallows ->
+            "shallows"
 
         Beach1 ->
             "beach1"
@@ -93,6 +97,9 @@ toColor landType =
     case landType of
         Ocean ->
             Color.rgb255 0x00 0x40 0x80
+
+        Shallows ->
+            Color.rgb255 0x00 0x60 0xA0
 
         Beach1 ->
             Color.rgb255 0xF9 0xD3 0x32

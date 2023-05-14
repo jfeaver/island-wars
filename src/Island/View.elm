@@ -141,11 +141,7 @@ renderable config island =
                     positiveNoise * fadeMultiplier * (1 - (fade ^ circleFactor))
 
                 thresholdedNoise =
-                    if fadedNoise < noiseThreshold then
-                        0
-
-                    else
-                        (fadedNoise - noiseThreshold) / (2 - noiseThreshold)
+                    (fadedNoise - noiseThreshold) / (2 - noiseThreshold)
 
                 -- How many possible elevation values are there?
                 maxElevation =
