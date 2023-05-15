@@ -23,6 +23,14 @@ canvas {
   width: 250px;
 }
 
+.inline-input label {
+  margin-right: 10px;
+}
+
+.change-island-inputs > * {
+  margin-bottom: 10px;
+}
+
 input[type="range"] {
   width: 250px;
 }

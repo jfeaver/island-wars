@@ -28,6 +28,7 @@ main =
 type alias Model =
     { world : World
     , worldCamera : Camera2D
+    , pendingSeed : Maybe Int
     }
 
 
@@ -37,6 +38,7 @@ init =
         update Regenerate
             { world = World.static
             , worldCamera = Camera.init ( 1400, 600 )
+            , pendingSeed = Nothing
             }
 
 
@@ -234,8 +236,10 @@ type Msg
     | NoiseStepSize String
     | Persistence String
     | Scale String
+    | PendingSeed String
+    | UserUpdateSeed
     | Regenerate
-    | RegenerateHelper Int
+    | UpdateSeed Int
 
 
 updateFromInput : Model -> String -> (String -> Maybe a) -> (Model -> a -> Model) -> ( Model, Cmd Msg )
@@ -298,10 +302,21 @@ update msg model =
         Scale text ->
             updateFromInput model text String.toFloat setNoiseScale
 
-        Regenerate ->
-            ( model, Random.generate RegenerateHelper World.noiseSeedGenerator )
+        PendingSeed text ->
+            ( { model | pendingSeed = String.toInt text }, Cmd.none )
 
-        RegenerateHelper noiseSeed ->
+        UserUpdateSeed ->
+            case model.pendingSeed of
+                Just seed ->
+                    update (UpdateSeed seed) model
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        Regenerate ->
+            ( { model | pendingSeed = Nothing }, Random.generate UpdateSeed World.noiseSeedGenerator )
+
+        UpdateSeed noiseSeed ->
             let
                 world =
                     model.world
@@ -317,10 +332,6 @@ update msg model =
 
 
 --- VIEW
--- TODO:
--- 3. Figure out itch.io requirements
--- 4. Build and upload
--- 5. Add inputs for noise config?
 
 
 view : Model -> Browser.Document Msg
@@ -349,9 +360,27 @@ editorControls game =
 
 
 changeIslandInputs : Model -> Html Msg
-changeIslandInputs _ =
-    Html.div []
-        [ Html.div [] [ Html.button [ Html.Events.onClick Regenerate ] [ text "New Island" ] ]
+changeIslandInputs model =
+    let
+        seed =
+            model.pendingSeed
+                |> Maybe.map String.fromInt
+                |> Maybe.withDefault ""
+    in
+    Html.div [ Html.Attributes.class "change-island-inputs" ]
+        [ Html.div [] [ text ("Current Island: " ++ String.fromInt model.world.noiseSeed) ]
+        , Html.div [] [ Html.button [ Html.Events.onClick Regenerate ] [ text "Random Island" ] ]
+        , Html.div [ Html.Attributes.class "inline-input" ]
+            [ Html.label [ Html.Attributes.for "pending-seed" ] [ text "Island #" ]
+            , Html.input
+                [ Html.Attributes.type_ "text"
+                , Html.Attributes.id "pending-seed"
+                , Html.Attributes.value seed
+                , Html.Events.onInput PendingSeed
+                ]
+                []
+            , Html.button [ Html.Events.onClick UserUpdateSeed ] [ text "Go!" ]
+            ]
         ]
 
 

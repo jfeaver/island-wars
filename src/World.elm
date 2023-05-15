@@ -196,7 +196,7 @@ view world camera =
 
 noiseSeedGenerator : Random.Generator Int
 noiseSeedGenerator =
-    Random.int 1000000 9999999
+    Random.int 10000 99999
 
 
 seed : Random.Generator Seed
