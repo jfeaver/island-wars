@@ -11,7 +11,11 @@ fmt() {
 }
 
 build() {
+  echo "Copying static files to dist/"
   mkdir -p dist/
   cp www/* dist/
+  echo "Compiling code..."
   elm make src/Editor.elm --output=dist/main.js --optimize
+  echo "Creating zip file"
+  zip -u dist.zip dist/*
 }

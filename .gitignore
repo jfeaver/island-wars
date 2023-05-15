@@ -1,4 +1,5 @@
 /dist
+dist.zip
 /.elm-land
 /.env
 /elm-stuff
